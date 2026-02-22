@@ -22,6 +22,7 @@ const gallery = document.querySelector('.gallery');
 let page = 1;
 let value = '';
 let totalHits = 0;
+const PER_PAGE = 15;
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
@@ -34,7 +35,6 @@ form.addEventListener('submit', async event => {
   value = query;
 
   if (!query) {
-    hideLoader();
     iziToast.show({
       class: 'custom-error-toast',
       message: 'Enter the search word',
@@ -55,12 +55,7 @@ form.addEventListener('submit', async event => {
         message:
           'Sorry, there are no images matching your search query. Please, try again!',
         position: 'topRight',
-        layout: 2,
         timeout: 5000,
-        close: true,
-        closeOnEscape: true,
-        transitionIn: 'fadeInLeft',
-        transitionOut: 'fadeOut',
         iconUrl: arrowLeft,
         iconColor: '#ffffff',
       });
@@ -71,10 +66,9 @@ form.addEventListener('submit', async event => {
     createGallery(data.hits);
     page += 1;
 
-    if ((page - 1) * 15 < totalHits) {
+    if ((page - 1) * PER_PAGE < totalHits) {
       showLoadMoreButton();
     } else {
-      hideLoadMoreButton();
       iziToast.show({
         class: 'custom-error-toast',
         message: "We're sorry, but you've reached the end of search results.",
@@ -84,7 +78,6 @@ form.addEventListener('submit', async event => {
     }
   } catch (error) {
     console.log(error);
-
     iziToast.show({
       class: 'custom-error-toast',
       message: 'Something went wrong while fetching data',
@@ -97,6 +90,7 @@ form.addEventListener('submit', async event => {
 });
 
 btnLoading.addEventListener('click', async () => {
+  hideLoadMoreButton(); // 🔥 обов'язково ховаємо кнопку перед запитом
   showLoader();
 
   try {
@@ -116,9 +110,9 @@ btnLoading.addEventListener('click', async () => {
 
       page += 1;
 
-      // Перевірка, чи користувач дійшов до кінця
-      if ((page - 1) * 15 >= totalHits) {
-        hideLoadMoreButton();
+      if ((page - 1) * PER_PAGE < totalHits) {
+        showLoadMoreButton();
+      } else {
         iziToast.show({
           class: 'custom-error-toast',
           message: "We're sorry, but you've reached the end of search results.",
@@ -127,7 +121,6 @@ btnLoading.addEventListener('click', async () => {
         });
       }
     } else {
-      hideLoadMoreButton();
       iziToast.show({
         class: 'custom-error-toast',
         message: "We're sorry, but you've reached the end of search results.",
